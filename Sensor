@@ -1,0 +1,61 @@
+Adafruit_GPS GPS;
+PulseOximeter pox;
+
+
+int ledPin=13;
+int sensorPin=8;
+int val = 0;
+
+void setup() {
+  pinMode(2, INPUT);
+  pinMode(3, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(7, INPUT);
+  pinMode(8, INPUT);
+  pinMode(9, INPUT);
+  pinMode(13, OUTPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+      string gpsResult = GPS.read();
+      Serial.println(gpsResult);
+  } else {
+      Serial.write("No data");
+  }
+  if (Serial.available() > 0) {
+      if (pox.begin()) {
+          string spO2_res = pox.getSpO2();
+          string hb_res = pox.getHeartRate();
+          Serial.println("");
+          Serial.println("Oxygen percentage: " + spO2_res + " Heart rate: " + hb_res);
+      }
+      digitalWrite(3, HIGH);
+  } else{
+      Serial.println("No data");
+      digitalWrite(3, LOW);
+  }
+  float temp = analogRead(A1) / 1023.0 * 5.0 * 100.0;
+  Serial.println("Temperature: " + to_string(temp));
+  float h = digitalRead(7);
+  Serial.println("Humidity: " + to_string(h));
+  val = digitalRead(8);
+  if (val==HIGH) {
+       digitalWrite(13, HIGH);
+  } else {
+       Serial.println("Sound: " + to_string(val));
+       digitalWrite(13, LOW);
+  }
+  int analogResult = analogRead(A2);
+  delay(100);
+  Serial.write("PPM: " + to_string(analogResult));
+  int digitalResult = digitalRead(8);
+  delay(100);
+  if (digitalResult == HIGH) digitalWrite(3, HIGH);
+  else digitalWrite(3, LOW);
+  delay(200);
+}
